@@ -269,7 +269,7 @@ def test_custom_file(file_path):
     except Exception as e:
         print(f"Ошибка при обработке файла: {e}")
 
-test_custom_file("/Users/tagirahmetsin/Downloads/g2.wav")
+test_custom_file("TestAudio/test.wav")
 
 # -----------------------------
 # 10. Очистка временных файлов

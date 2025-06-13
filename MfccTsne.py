@@ -97,7 +97,7 @@ X_test_norm = normalize(X_test_raw, X_train_mean, X_train_std)
 # -----------------------------
 # 4. Добавление пользовательского файла
 # -----------------------------
-custom_path = "/Users/tagirahmetsin/Downloads/g2.wav"
+custom_path = "TestAudio/test.wav"
 try:
     custom_features = extract_features(custom_path)
     custom_features_norm = normalize(custom_features, X_train_mean, X_train_std)
