@@ -203,7 +203,7 @@ plt.xlabel('tSNE1')
 plt.ylabel('tSNE2')
 plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
 plt.tight_layout()
-plt.savefig('tsne_2d_speaker_embeddings.png')
+plt.savefig('visualisations/tsne/tsne_2d_speaker_embeddings.png')
 plt.close()
 
 # --- 2D UMAP график ---
@@ -214,7 +214,7 @@ plt.xlabel('UMAP1')
 plt.ylabel('UMAP2')
 plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
 plt.tight_layout()
-plt.savefig('umap_2d_speaker_embeddings.png')
+plt.savefig('visualisations/umap/umap_2d_speaker_embeddings.png')
 plt.close()
 
 # --- 3D t-SNE график с Plotly ---
@@ -222,20 +222,20 @@ fig = px.scatter_3d(df, x='tSNE1', y='tSNE2', z='tSNE3',
                     color='Label', title='t-SNE 3D: Распределение классов',
                     hover_data=['Label'])
 fig.update_traces(marker=dict(size=4))
-fig.write_html('tsne_3d_speaker_embeddings.html')
+fig.write_html('visualisations/tsne/tsne_3d_speaker_embeddings.html')
 
 # --- 3D UMAP график с Plotly ---
 fig = px.scatter_3d(df, x='UMAP1', y='UMAP2', z='UMAP3',
                     color='Label', title='UMAP 3D: Распределение классов',
                     hover_data=['Label'])
 fig.update_traces(marker=dict(size=4))
-fig.write_html('umap_3d_speaker_embeddings.html')
+fig.write_html('visualisations/umap/umap_3d_speaker_embeddings.html')
 
 print("Графики сохранены:")
-print(" - tsne_2d_speaker_embeddings.png")
-print(" - umap_2d_speaker_embeddings.png")
-print(" - tsne_3d_speaker_embeddings.html")
-print(" - umap_3d_speaker_embeddings.html")
+print(" - visualisations/tsne/tsne_2d_speaker_embeddings.png")
+print(" - visualisations/umap/umap_2d_speaker_embeddings.png")
+print(" - visualisations/tsne/tsne_3d_speaker_embeddings.html")
+print(" - visualisations/umap/umap_3d_speaker_embeddings.html")
 
 # -----------------------------
 # 8. Матрица ошибок
@@ -248,8 +248,8 @@ plt.title(f"Матрица ошибок (k = {fixed_k})")
 plt.xlabel("Предсказано")
 plt.ylabel("Истинно")
 plt.tight_layout()
-plt.savefig("confusion_matrix_speaker_embeddings.png")
-print("Матрица ошибок сохранена как confusion_matrix_speaker_embeddings.png")
+plt.savefig("visualisations/confusion_matrices/confusion_matrix_speaker_embeddings.png")
+print("Матрица ошибок сохранена как visualisations/confusion_matrices/confusion_matrix_speaker_embeddings.png")
 plt.close()
 
 # -----------------------------

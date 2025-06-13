@@ -144,7 +144,7 @@ plt.ylabel("Компонента 2")
 plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
 plt.grid(True)
 plt.tight_layout()
-plt.savefig("tsne_2d_visualization.png")
+plt.savefig("visualisations/tsne/tsne_2d_visualization.png")
 plt.close()  # Закрываем фигуру, чтобы не мешать другим графикам
 
 # --- 3D график с Plotly ---
@@ -159,10 +159,10 @@ fig = px.scatter_3d(df, x='TSNE1', y='TSNE2', z='TSNE3',
                     color='Label', title="t-SNE 3D визуализация данных",
                     hover_data=['Label'])
 fig.update_traces(marker=dict(size=4))
-fig.write_html("tsne_3d_visualization.html")
+fig.write_html("visualisations/tsne/tsne_3d_visualization.html")
 fig.show()
 
-print("Графики сохранены как tsne_2d_visualization.png и tsne_3d_visualization.html")
+print("Графики сохранены как visualisations/tsne/tsne_2d_visualization.png и visualisations/tsne/tsne_3d_visualization.html")
 
 # -----------------------------
 # 6. kNN
@@ -197,9 +197,9 @@ plt.title(f"Матрица ошибок (k = {fixed_k})")
 plt.xlabel("Предсказано")
 plt.ylabel("Истинно")
 plt.tight_layout()
-plt.savefig("confusion_matrix_kNN.png")
+plt.savefig("visualisations/confusion_matrices/confusion_matrix_kNN.png")
 plt.close()
-print("Матрица ошибок сохранена как confusion_matrix_kNN.png")
+print("Матрица ошибок сохранена как visualisations/confusion_matrices/confusion_matrix_kNN.png")
 
 # -----------------------------
 # 8. Предсказание пользовательского файла
