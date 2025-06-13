@@ -6,6 +6,8 @@ from collections import Counter
 import tempfile
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd
+import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from sklearn.manifold import TSNE
@@ -108,12 +110,59 @@ except Exception as e:
 # -----------------------------
 print("\nВыполняется t-SNE...")
 X_combined = np.vstack([X_train_norm, X_test_norm, custom_features_norm])
-tsne = TSNE(n_components=2, random_state=42, perplexity=30, init="random")
+
+# Для 3D используем n_components=3
+tsne = TSNE(n_components=3, random_state=42, perplexity=30, init="random")
 X_tsne_combined = tsne.fit_transform(X_combined)
 
 X_train_2D = X_tsne_combined[:len(X_train_norm)]
 X_test_2D = X_tsne_combined[len(X_train_norm):-1]
 X_custom_2D = X_tsne_combined[-1].reshape(1, -1)
+
+# -----------------------------
+# 7.1 Визуализация 2D и 3D с помощью t-SNE
+# -----------------------------
+print("\nВизуализация: построение 2D и 3D графиков...")
+
+all_labels = np.concatenate([y_train, y_test])
+if custom_features_norm is not None:
+    all_labels = np.append(all_labels, "Custom User Audio")
+
+# --- 2D график ---
+plt.figure(figsize=(10, 8))
+unique_classes = np.unique(all_labels)
+palette = sns.color_palette("hsv", len(unique_classes))
+
+for label, color in zip(unique_classes, palette):
+    idxs = [i for i, l in enumerate(all_labels) if l == label]
+    plt.scatter(X_tsne_combined[idxs, 0], X_tsne_combined[idxs, 1],
+                label=label, color=color, alpha=0.7, s=10)
+
+plt.title("t-SNE 2D визуализация данных")
+plt.xlabel("Компонента 1")
+plt.ylabel("Компонента 2")
+plt.legend(loc='upper right', bbox_to_anchor=(1.2, 1))
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("tsne_2d_visualization.png")
+plt.close()  # Закрываем фигуру, чтобы не мешать другим графикам
+
+# --- 3D график с Plotly ---
+df = pd.DataFrame({
+    'TSNE1': X_tsne_combined[:, 0],
+    'TSNE2': X_tsne_combined[:, 1],
+    'TSNE3': X_tsne_combined[:, 2],
+    'Label': all_labels
+})
+
+fig = px.scatter_3d(df, x='TSNE1', y='TSNE2', z='TSNE3',
+                    color='Label', title="t-SNE 3D визуализация данных",
+                    hover_data=['Label'])
+fig.update_traces(marker=dict(size=4))
+fig.write_html("tsne_3d_visualization.html")
+fig.show()
+
+print("Графики сохранены как tsne_2d_visualization.png и tsne_3d_visualization.html")
 
 # -----------------------------
 # 6. kNN

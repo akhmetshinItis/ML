@@ -5,10 +5,14 @@ from pydub import AudioSegment
 import tempfile
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd
+import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.manifold import TSNE
+import umap
 import torch
 from speechbrain.inference import EncoderClassifier
 
@@ -118,7 +122,6 @@ print("Уникальные классы в y_train после фильтрац�
 def normalize(X, mean, std):
     return (X - mean) / (std + 1e-8)
 
-
 X_train_mean = X_train_raw.mean(axis=0)
 X_train_std = X_train_raw.std(axis=0)
 X_train_norm = normalize(X_train_raw, X_train_mean, X_train_std)
@@ -153,7 +156,89 @@ print("\n🔍 Классификационный отчет:")
 print(classification_report(y_test, y_pred, zero_division=0))
 
 # -----------------------------
-# 7. Визуализация
+# 7. Визуализация: t-SNE / UMAP для 2D и 3D
+# -----------------------------
+print("\n📊 Начинаем визуализацию: t-SNE и UMAP...")
+
+# Объединяем train + test для визуализации
+X_combined = np.vstack([X_train_norm, X_test_norm])
+y_combined = np.hstack([y_train, y_test])
+
+# t-SNE 2D
+print("🧮 Применяю t-SNE 2D...")
+tsne_2d = TSNE(n_components=2, random_state=42, perplexity=30)
+X_tsne_2d = tsne_2d.fit_transform(X_combined)
+
+# t-SNE 3D
+print("🧮 Применяю t-SNE 3D...")
+tsne_3d = TSNE(n_components=3, random_state=42, perplexity=30)
+X_tsne_3d = tsne_3d.fit_transform(X_combined)
+
+# UMAP 2D
+print("🧮 Применяю UMAP 2D...")
+umap_2d = umap.UMAP(n_components=2, random_state=42)
+X_umap_2d = umap_2d.fit_transform(X_combined)
+
+# UMAP 3D
+print("🧮 Применяю UMAP 3D...")
+umap_3d = umap.UMAP(n_components=3, random_state=42)
+X_umap_3d = umap_3d.fit_transform(X_combined)
+
+# Добавляем метки в DataFrame
+df = pd.DataFrame({
+    'Label': y_combined,
+    'tSNE1': X_tsne_2d[:, 0],
+    'tSNE2': X_tsne_2d[:, 1],
+    'tSNE3': X_tsne_3d[:, 2],
+    'UMAP1': X_umap_2d[:, 0],
+    'UMAP2': X_umap_2d[:, 1],
+    'UMAP3': X_umap_3d[:, 2]
+})
+
+# --- 2D t-SNE график ---
+plt.figure(figsize=(10, 8))
+sns.scatterplot(x='tSNE1', y='tSNE2', hue='Label', data=df, palette='tab20', legend='full', s=60)
+plt.title('t-SNE 2D: Распределение классов по эмбеддингам')
+plt.xlabel('tSNE1')
+plt.ylabel('tSNE2')
+plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
+plt.tight_layout()
+plt.savefig('tsne_2d_speaker_embeddings.png')
+plt.close()
+
+# --- 2D UMAP график ---
+plt.figure(figsize=(10, 8))
+sns.scatterplot(x='UMAP1', y='UMAP2', hue='Label', data=df, palette='tab20', legend='full', s=60)
+plt.title('UMAP 2D: Распределение классов по эмбеддингам')
+plt.xlabel('UMAP1')
+plt.ylabel('UMAP2')
+plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1))
+plt.tight_layout()
+plt.savefig('umap_2d_speaker_embeddings.png')
+plt.close()
+
+# --- 3D t-SNE график с Plotly ---
+fig = px.scatter_3d(df, x='tSNE1', y='tSNE2', z='tSNE3',
+                    color='Label', title='t-SNE 3D: Распределение классов',
+                    hover_data=['Label'])
+fig.update_traces(marker=dict(size=4))
+fig.write_html('tsne_3d_speaker_embeddings.html')
+
+# --- 3D UMAP график с Plotly ---
+fig = px.scatter_3d(df, x='UMAP1', y='UMAP2', z='UMAP3',
+                    color='Label', title='UMAP 3D: Распределение классов',
+                    hover_data=['Label'])
+fig.update_traces(marker=dict(size=4))
+fig.write_html('umap_3d_speaker_embeddings.html')
+
+print("✅ Графики сохранены:")
+print(" - tsne_2d_speaker_embeddings.png")
+print(" - umap_2d_speaker_embeddings.png")
+print(" - tsne_3d_speaker_embeddings.html")
+print(" - umap_3d_speaker_embeddings.html")
+
+# -----------------------------
+# 8. Матрица ошибок
 # -----------------------------
 plt.figure(figsize=(10, 6))
 cm = confusion_matrix(y_test, y_pred, labels=np.unique(y_test))
@@ -167,9 +252,8 @@ plt.savefig("confusion_matrix_speaker_embeddings.png")
 print("📊 Матрица ошибок сохранена как confusion_matrix_speaker_embeddings.png")
 plt.close()
 
-
 # -----------------------------
-# 8. Тестирование на своём файле
+# 9. Тестирование на своём файле
 # -----------------------------
 def test_custom_file(file_path):
     print(f"\n🔎 Тестирование на файле: {file_path}")
@@ -185,11 +269,10 @@ def test_custom_file(file_path):
     except Exception as e:
         print(f"❌ Ошибка при обработке файла: {e}")
 
-
 test_custom_file("/Users/tagirahmetsin/Downloads/g2.wav")
 
 # -----------------------------
-# 9. Очистка временных файлов
+# 10. Очистка временных файлов
 # -----------------------------
 for path in temp_noise_paths:
     try:
