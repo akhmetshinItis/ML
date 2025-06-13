@@ -25,7 +25,7 @@ speakers = [s for s in os.listdir(data_dir)
             if os.path.isdir(os.path.join(data_dir, s))
             and s not in ["background_noise", "other", "_background_noise_", ".DS_Store"]
             and len([f for f in os.listdir(os.path.join(data_dir, s)) if f.endswith(".wav")]) >= 2]
-print("🎤 Найдено спикеров:", len(speakers))
+print("Найдено спикеров:", len(speakers))
 
 train_file_paths, train_labels = [], []
 test_file_paths, test_labels = [], []
@@ -73,7 +73,7 @@ print("Уникальные классы в y_test:", np.unique(test_labels))
 # 2. Извлечение speaker embeddings
 # -----------------------------
 device = "mps" if torch.backends.mps.is_available() else "cpu"
-print(f"🛠 Используем устройство: {device}")
+print(f"Используем устройство: {device}")
 classifier = EncoderClassifier.from_hparams(
     source="speechbrain/spkrec-ecapa-voxceleb",
     savedir="pretrained_models/spkrec-ecapa-voxceleb",
@@ -88,7 +88,7 @@ def extract_speaker_embedding(file_path):
         embedding = classifier.encode_batch(signal)
         return embedding.squeeze().cpu().detach().numpy()
     except Exception as e:
-        print(f"⚠️ Ошибка при обработке {file_path}: {e}")
+        print(f"Ошибка при обработке {file_path}: {e}")
         return None
 
 def extract_embeddings_batch(paths, labels):
@@ -100,9 +100,9 @@ def extract_embeddings_batch(paths, labels):
             valid_labels.append(label)
     return np.array(embeddings), np.array(valid_labels)
 
-print("🔄 Извлечение эмбеддингов для тренировочной выборки...")
+print("Извлечение эмбеддингов для тренировочной выборки...")
 X_train_raw, y_train = extract_embeddings_batch(train_file_paths, train_labels)
-print("🔄 Извлечение эмбеддингов для тестовой выборки...")
+print("Извлечение эмбеддингов для тестовой выборки...")
 X_test_raw, y_test = extract_embeddings_batch(test_file_paths, test_labels)
 
 print(f"Обработано тренировочных файлов: {len(X_train_raw)} из {len(train_file_paths)}")
@@ -151,36 +151,36 @@ print("Уникальные предсказанные классы:", np.unique
 # 6. Отчеты
 # -----------------------------
 accuracy = accuracy_score(y_test, y_pred)
-print(f"\n✅ Точность модели на тестовой выборке: {accuracy:.4f}")
-print("\n🔍 Классификационный отчет:")
+print(f"\nТочность модели на тестовой выборке: {accuracy:.4f}")
+print("\nКлассификационный отчет:")
 print(classification_report(y_test, y_pred, zero_division=0))
 
 # -----------------------------
 # 7. Визуализация: t-SNE / UMAP для 2D и 3D
 # -----------------------------
-print("\n📊 Начинаем визуализацию: t-SNE и UMAP...")
+print("\nНачинаем визуализацию: t-SNE и UMAP...")
 
 # Объединяем train + test для визуализации
 X_combined = np.vstack([X_train_norm, X_test_norm])
 y_combined = np.hstack([y_train, y_test])
 
 # t-SNE 2D
-print("🧮 Применяю t-SNE 2D...")
+print("Применяю t-SNE 2D...")
 tsne_2d = TSNE(n_components=2, random_state=42, perplexity=30)
 X_tsne_2d = tsne_2d.fit_transform(X_combined)
 
 # t-SNE 3D
-print("🧮 Применяю t-SNE 3D...")
+print("Применяю t-SNE 3D...")
 tsne_3d = TSNE(n_components=3, random_state=42, perplexity=30)
 X_tsne_3d = tsne_3d.fit_transform(X_combined)
 
 # UMAP 2D
-print("🧮 Применяю UMAP 2D...")
+print("Применяю UMAP 2D...")
 umap_2d = umap.UMAP(n_components=2, random_state=42)
 X_umap_2d = umap_2d.fit_transform(X_combined)
 
 # UMAP 3D
-print("🧮 Применяю UMAP 3D...")
+print("Применяю UMAP 3D...")
 umap_3d = umap.UMAP(n_components=3, random_state=42)
 X_umap_3d = umap_3d.fit_transform(X_combined)
 
@@ -231,7 +231,7 @@ fig = px.scatter_3d(df, x='UMAP1', y='UMAP2', z='UMAP3',
 fig.update_traces(marker=dict(size=4))
 fig.write_html('umap_3d_speaker_embeddings.html')
 
-print("✅ Графики сохранены:")
+print("Графики сохранены:")
 print(" - tsne_2d_speaker_embeddings.png")
 print(" - umap_2d_speaker_embeddings.png")
 print(" - tsne_3d_speaker_embeddings.html")
@@ -249,25 +249,25 @@ plt.xlabel("Предсказано")
 plt.ylabel("Истинно")
 plt.tight_layout()
 plt.savefig("confusion_matrix_speaker_embeddings.png")
-print("📊 Матрица ошибок сохранена как confusion_matrix_speaker_embeddings.png")
+print("Матрица ошибок сохранена как confusion_matrix_speaker_embeddings.png")
 plt.close()
 
 # -----------------------------
 # 9. Тестирование на своём файле
 # -----------------------------
 def test_custom_file(file_path):
-    print(f"\n🔎 Тестирование на файле: {file_path}")
+    print(f"\nТестирование на файле: {file_path}")
     try:
         embedding = extract_speaker_embedding(file_path)
         if embedding is not None:
             embedding = normalize(embedding, X_train_mean, X_train_std)
             embedding = pca.transform([embedding])
             prediction = knn.predict(embedding)
-            print(f"📢 Предсказанный класс: {prediction[0]}")
+            print(f"Предсказанный класс: {prediction[0]}")
         else:
-            print("❌ Не удалось извлечь эмбеддинг")
+            print("Не удалось извлечь эмбеддинг")
     except Exception as e:
-        print(f"❌ Ошибка при обработке файла: {e}")
+        print(f"Ошибка при обработке файла: {e}")
 
 test_custom_file("/Users/tagirahmetsin/Downloads/g2.wav")
 
